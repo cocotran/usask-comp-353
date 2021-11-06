@@ -19,6 +19,17 @@
 
     <p class="text-center">-------------- Posts --------------</p>
 
+    <p>Sort</p>
+    <select name="sortby" id="sortby">
+        <option value="topic">Topic</option>
+        <option value="timestp">Time</option>
+    </select>
+    <select name="order" id="order">
+        <option value="ASC">ASC</option>
+        <option value="DESC">DESC</option>
+    </select>
+
+
     <div id="post-container" class="post-container"></div>
 </body>
 
@@ -64,8 +75,8 @@
     const createPostBtn = document.getElementById("createPostBtn");
     const topicInput = document.getElementById("topic");
     const contentInput = document.getElementById("content");
-
-    let posts = []
+    const sortby = document.getElementById("sortby");
+    const order = document.getElementById("order");
 
     let xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
@@ -90,30 +101,12 @@
         postContainer.appendChild(newPost);
     }
 
-    function fetchNewPosts(params) {
-        console.log("Fetching")
-        xhr.open('GET', '/posts', true);
-        xhr.onload = function() {
-            if (xhr.status != 200) { // analyze HTTP status of the response
-                alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
-            } else {
-                const newPosts = xhr.response.data.split(" \n").filter((post) => post !== "");
-                if (newPosts.length > posts.length) {
-                    const postsToAdd = newPosts.slice(posts.length, newPosts.length);
-                    posts = [...posts,...postsToAdd];
-                    postsToAdd.forEach(post => {
-                        if (post) {
-                            const content = post.split("|")
-                            createNewPostCard(content[0], content[1], content[2].trim());
-                        }
-                    })
-                }
-            }
-        };
-        xhr.onerror = function() {
-            alert("Request failed");
-        };
-        xhr.send();
+    async function fetchNewPosts(params) {
+        postContainer.innerHTML = "";
+        console.log("Fetching");
+        const query = `/posts?orderBy=${sortby.value}&order=${order.value}`
+        const posts = await fetch(query).then(data => data.json());
+        posts?.data.forEach(post => createNewPostCard(post.timestp, post.topic, post.content))
     }
 
     function createPostContainerToggle() {
@@ -138,15 +131,9 @@
             xhr.setRequestHeader('Content-type', 'application/json');
             xhr.onload = function () {
                 if (xhr.status != 200) { // analyze HTTP status of the response
-                   alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+                    alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
                 } else {
-                    if (xhr.response.response) {
-                        resetNewPostInput();
-                        alert("Successfully created new post");
-                        fetchNewPosts();
-                    }
-                    else if (xhr.response.error)
-                        alert("Failed to create new post")
+                    alert("Successfully created new post");
                 }
             };
             xhr.onerror = function() {

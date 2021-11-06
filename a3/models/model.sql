@@ -1,9 +1,8 @@
 CREATE DATABASE IF NOT EXISTS assignment;
 
 CREATE TABLE IF NOT EXISTS posts (
-	postID INT PRIMARY KEY,
+	postID INT PRIMARY KEY AUTO_INCREMENT,
     topic VARCHAR(255),
-    timestamp DATE,
-    data VARCHAR(255),
+    timestp DATE,
+    content VARCHAR(255)
 );
-
