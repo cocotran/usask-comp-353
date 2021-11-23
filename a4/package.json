@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "mysql": "^2.18.1"
+    "nano": "^9.0.5"
   },
   "devDependencies": {
     "loadtest": "^5.1.2"

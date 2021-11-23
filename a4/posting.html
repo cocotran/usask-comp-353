@@ -78,9 +78,6 @@
     const sortby = document.getElementById("sortby");
     const order = document.getElementById("order");
 
-    let xhr = new XMLHttpRequest();
-    xhr.responseType = 'json';
-
     function createNewPostCard(timestamp, topic, data) {
         let newPost = document.createElement("div");
         newPost.setAttribute("class", "post");
@@ -106,7 +103,9 @@
         console.log("Fetching");
         const query = `/posts?orderBy=${sortby.value}&order=${order.value}`
         const posts = await fetch(query).then(data => data.json());
-        posts?.data.forEach(post => createNewPostCard(post.timestp, post.topic, post.content))
+        console.log(posts);
+        if (posts.data.length > 0)
+            posts.data.forEach(post => createNewPostCard(post.doc.timestamp, post.doc.topic, post.doc.data));
     }
 
     function createPostContainerToggle() {
@@ -119,7 +118,7 @@
         }
     }
 
-    function createPost() {
+    async function createPost() {
         const topic = topicInput.value;
         const content = contentInput.value;
         if (!topic)
@@ -127,19 +126,18 @@
         if (!content)
             alert("No one wants to read an empty post.")
         if (topic && content) {
-            xhr.open('POST', "/postmessage", true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.onload = function () {
-                if (xhr.status != 200) { // analyze HTTP status of the response
-                    alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
-                } else {
-                    alert("Successfully created new post");
-                }
-            };
-            xhr.onerror = function() {
-                alert("Request failed");
-            };
-            xhr.send(JSON.stringify({topic: topic, data: content}));
+            const response = await fetch("/postmessage", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({topic: topic, data: content})
+            });
+            const result = await response.json();
+            if (result.ok) {
+                alert("Successfullt created new post");
+                resetNewPostInput();
+            }
         }
     }
 
@@ -152,7 +150,7 @@
 
     function polling() {
         fetchNewPosts();
-        setTimeout(polling, 10000) // Fetch every 10s
+        // setTimeout(polling, 10000) // Fetch every 10s
     }
     polling()
 
