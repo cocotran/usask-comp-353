@@ -9,11 +9,11 @@ const pw = "admin";
 const url = "localhost:5984";
 const nano = require('nano')(`http://${userName}:${pw}@${url}`);
 
-// nano.db.create(DATABASE, function(err) {  
-//     if (err) {
-//       console.error(err);
-//     }
-// });
+nano.db.create(DATABASE, function(err) {  
+    if (err) {
+      console.error(err);
+    }
+});
 
 const posts = nano.db.use(DATABASE);
 
