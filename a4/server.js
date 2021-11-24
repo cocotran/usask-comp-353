@@ -9,6 +9,7 @@ const pw = "admin";
 const url = "localhost:5984";
 const nano = require('nano')(`http://${userName}:${pw}@${url}`);
 
+// Part A
 nano.db.create(DATABASE, function(err) {  
     if (err) {
       console.error(err);
