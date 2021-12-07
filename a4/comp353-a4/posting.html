@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+</head>
+<body>
+    <button type="button" onclick="fetchNewPosts()">Refresh</button>
+    <button id="createPostBtn" type="button" onclick="createPostContainerToggle()">Create New Post</button>
+
+    <div id="create-post-container" class="create-post-container">
+        <label for="topic">Topic:</label>
+        <input type="text" id="topic" name="topic"><br><br>
+        <textarea id="content" name="content" rows="10" cols="100" placeholder="Something interesting"></textarea><br>
+        <button type="button" onclick="createPost()">Post</button>
+    </div>
+
+    <p class="text-center">-------------- Posts --------------</p>
+
+    <p>Sort</p>
+    <select name="sortby" id="sortby">
+        <option value="topic">Topic</option>
+        <option value="timestp">Time</option>
+    </select>
+    <select name="order" id="order">
+        <option value="ASC">ASC</option>
+        <option value="DESC">DESC</option>
+    </select>
+
+
+    <div id="post-container" class="post-container"></div>
+</body>
+
+<style>
+    .post-container {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .post {
+        width: 15rem;
+        height: 15rem;
+        border: 1px solid gray;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 1rem;
+    }
+    .create-post-container {
+        margin-top: 1.5rem;
+        display: none;
+    }
+    #topic {
+        width: 50%;
+    }
+    #createPostBtn {
+        margin-left: 1rem;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .content {
+        width: 100%;
+        word-break: break-all;
+    }
+    .scroll {
+        overflow: auto;
+    }
+</style>
+
+<script>
+    const postContainer = document.getElementById("post-container");
+    const createPostContainer = document.getElementById("create-post-container");
+    const createPostBtn = document.getElementById("createPostBtn");
+    const topicInput = document.getElementById("topic");
+    const contentInput = document.getElementById("content");
+    const sortby = document.getElementById("sortby");
+    const order = document.getElementById("order");
+
+    function createNewPostCard(timestamp, topic, data) {
+        let newPost = document.createElement("div");
+        newPost.setAttribute("class", "post");
+        newPost.classList.add("scroll");
+        let timeText = document.createElement("p");
+        timeText.innerHTML = `Time: ${timestamp}`;
+        timeText.style.color = "#a0aec0";
+        let topicText = document.createElement("p");
+        topicText.innerHTML = `Topic: ${topic}`;
+        topicText.style.color = "#319795";
+        let dataText = document.createElement("p");
+        dataText.innerHTML = `${data}`;
+        dataText.classList.add("content");
+
+        newPost.appendChild(timeText);
+        newPost.appendChild(topicText);
+        newPost.appendChild(dataText);
+        postContainer.appendChild(newPost);
+    }
+
+    async function fetchNewPosts(params) {
+        postContainer.innerHTML = "";
+        console.log("Fetching");
+        const query = `/posts?orderBy=${sortby.value}&order=${order.value}`
+        const posts = await fetch(query).then(data => data.json());
+        console.log(posts);
+        if (posts.data.length > 0)
+            posts.data.forEach(post => createNewPostCard(post.doc.timestamp, post.doc.topic, post.doc.data));
+    }
+
+    function createPostContainerToggle() {
+        if (createPostContainer.style.display === "none" || createPostContainer.style.display === "") {
+            createPostContainer.style.display = "block";
+            createPostBtn.innerText = "Cancel";
+        } else {
+            createPostContainer.style.display = "none";
+            createPostBtn.innerText = "Create New Post";
+        }
+    }
+
+    async function createPost() {
+        const topic = topicInput.value;
+        const content = contentInput.value;
+        if (!topic)
+            alert("Please enter a topic.");
+        if (!content)
+            alert("No one wants to read an empty post.")
+        if (topic && content) {
+            const response = await fetch("/postmessage", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({topic: topic, data: content})
+            });
+            const result = await response.json();
+            if (result.ok) {
+                alert("Successfullt created new post");
+                resetNewPostInput();
+            }
+        }
+    }
+
+    function resetNewPostInput() {
+        topicInput.value = "";
+        contentInput.value = "";
+        createPostContainer.style.display = "none";
+        createPostBtn.innerText = "Create New Post";
+    }
+
+    function polling() {
+        fetchNewPosts();
+        // setTimeout(polling, 10000) // Fetch every 10s
+    }
+    polling()
+
+</script>
+
+</html>

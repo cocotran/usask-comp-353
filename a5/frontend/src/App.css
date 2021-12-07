@@ -1,0 +1,40 @@
+.post-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+.post {
+    width: 15rem;
+    height: 15rem;
+    border: 1px solid gray;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem;
+}
+.create-post-container {
+    margin-top: 1.5rem;
+}
+#topic {
+    width: 50%;
+}
+#createPostBtn {
+    margin-left: 1rem;
+}
+.text-center {
+    text-align: center;
+}
+.content {
+    width: 100%;
+    word-break: break-all;
+}
+.scroll {
+    overflow: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+.w-full {
+    width: 100%;
+}
